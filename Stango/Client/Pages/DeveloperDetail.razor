@@ -1,0 +1,65 @@
+﻿@page "/developerdetails"
+@using Stango.Shared.Models
+@inject HttpClient HttpClient
+@inject ISnackbar Snackbar
+
+<PageTitle>Developer Details</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Developer Details</MudText>
+
+@if (developers.Count <= 0 )
+{
+
+    <MudProgressCircular Color="Color.Primary" Style="height:70px;width:70px;" Indeterminate="true" />
+}
+else
+{
+
+
+    <MudTable Items="developers" Hover="true" SortLabel="Sort By" Elevation="0">
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>Username</MudTh>
+            <MudTh>Company</MudTh>
+            <MudTh>Email</MudTh>
+            <MudTh>Action</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Username">@context.UserName</MudTd>
+            <MudTd DataLabel="Company">@context.Company</MudTd>
+            <MudTd DataLabel="Email">@context.Email</MudTd>
+            <MudTd DataLabel="">
+                <MudFab Href="@($"/developer/edit/{context.Id}")" Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" Size="Size.Small" IconSize="Size.Small" />
+                <MudFab Href="@($"/developer/delete/{context.Id}")" Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" Size="Size.Small" IconSize="Size.Small" />
+        </MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[]{50, 100}" />
+        </PagerContent>
+    </MudTable>
+
+ 
+    <MudPaper Class="d-flex flex-row-reverse flex-grow-1 gap-4" Elevation="0">
+       <MudFab Href ="/developer/add" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" />
+    </MudPaper>
+
+}
+
+@code {
+
+    //We need a List Developers
+    protected List<Developer> developers = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetDevelopers();
+    }
+
+    protected async Task GetDevelopers()
+    {
+        developers = await HttpClient.GetFromJsonAsync<List<Developer>>("api/developer");
+    }
+    
+}
+

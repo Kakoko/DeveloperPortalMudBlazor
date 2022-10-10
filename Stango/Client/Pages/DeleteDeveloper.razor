@@ -1,0 +1,79 @@
+﻿@page "/developer/delete/{Id:guid}"
+@using Stango.Shared.Models
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
+
+
+
+<PageTitle>Delete Developer</PageTitle>
+<br />
+
+
+
+<div class="container">
+    
+    <MudText Align="Align.Center" Typo="Typo.h4" Style=""><b>Do you want to delete @developer.UserName ?</b></MudText>
+    <MudSimpleTable Align="Align.Center" Style="overflow-x: auto;">
+
+        <tbody>
+            <tr>
+                <td><b>User Name</b></td>
+                <td><em>@developer.UserName</em></td>
+            </tr>
+            <tr>
+                <td><b>Company</b></td>
+                <td><em>@developer.Company</em></td>
+            </tr>
+            <tr>
+                <td><b>Email</b></td>
+                <td><em>@developer.Email</em></td>
+            </tr>
+
+        </tbody>
+    </MudSimpleTable>
+</div>
+<hr />
+<br />
+<MudPaper Class="d-flex flex-column flex-grow-1 gap-4" Elevation="0">
+    <MudButton @onclick="@((() => RemoveDeveloper(@developer.Id)))" Variant="Variant.Filled" Color="Color.Secondary">Delete</MudButton>
+    <MudButton @onclick="@((() => HomePage()))" Variant="Variant.Filled">Cancel</MudButton>
+</MudPaper>
+
+@code {
+
+    [Parameter]
+    public Guid Id { get; set; }
+
+
+
+   
+    Developer developer = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result =  await HttpClient.GetFromJsonAsync<Developer>($"api/developer/{Id}");
+        if(result != null)
+        {
+            developer = result;
+        }
+    }
+
+    protected async Task RemoveDeveloper(Guid Id)
+    {
+        var result = await HttpClient.DeleteAsync($"api/developer/{Id}");
+        if(result != null)
+        {
+            HomePage();
+            Snackbar.Add("Deleted Developer Successfully", Severity.Success);
+        }
+
+      
+    }
+
+    public void HomePage()
+    {
+        NavigationManager.NavigateTo("/developerdetails");
+    }
+}

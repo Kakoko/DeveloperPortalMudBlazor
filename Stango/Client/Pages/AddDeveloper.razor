@@ -1,0 +1,86 @@
+﻿@page "/developer/add"
+@page "/developer/edit/{Id:guid}"
+@using Stango.Shared.Models
+@using System.ComponentModel.DataAnnotations
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
+
+
+<div class="container">
+ 
+<MudText Typo="Typo.h4" Style=""><b>Adding Developer</b></MudText>
+<EditForm Model="@developer" OnValidSubmit="SaveDeveloper">
+    <DataAnnotationsValidator />
+    <MudGrid>
+        <MudItem xs="12" sm="7">
+            <MudCard>
+                <MudCardContent>
+                    <MudTextField Label="User Name" HelperText="Max. 8 characters"
+                                  @bind-Value="developer.UserName" For="@(() => developer.UserName)" Variant="Variant.Outlined" />
+                    <MudTextField Label="Company" Class="mt-3"
+                                  @bind-Value="developer.Company" For="@(() => developer.Company)" Variant="Variant.Outlined" />
+                    <MudTextField Label="Email" Class="mt-3"
+                                  @bind-Value="developer.Email" For="@(() => developer.Email)" InputType="InputType.Email" Variant="Variant.Outlined" />
+                </MudCardContent>
+                <MudCardActions>
+                    <MudPaper Class="d-flex flex-column flex-grow-1 gap-4" Elevation="0">
+                            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Register</MudButton>
+                            <MudButton @onclick="HomePage" Variant="Variant.Filled" Color="Color.Error">Cancel</MudButton>
+                    </MudPaper>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</EditForm>
+
+</div>
+
+@code {
+   
+
+        [Parameter]
+        public Guid Id { get; set; }
+
+        protected string Title = "Add";
+
+        protected Developer developer = new();
+
+        protected override async Task OnParametersSetAsync()
+        {
+            if (Id != Guid.Empty)
+            {
+                Title = "Edit";
+                developer = await HttpClient.GetFromJsonAsync<Developer>($"api/developer/{Id}");
+            }
+        }
+
+        protected async Task SaveDeveloper()
+        {
+            if (Id != Guid.Empty)
+            {
+                await HttpClient.PutAsJsonAsync($"api/developer", developer);
+           
+                Snackbar.Add("Edited Developer Successfully", Severity.Success);
+            }
+            else
+            {
+                await HttpClient.PostAsJsonAsync($"api/developer", developer);
+                Snackbar.Add("Added Developer Successfully", Severity.Success);
+            }
+
+            HomePage();
+        }
+
+        public void HomePage()
+        {
+            NavigationManager.NavigateTo("/developerdetails");
+        }
+
+    public int Value { get; set; }
+
+  
+}
+
+
